@@ -194,7 +194,11 @@ int main()
 	//set_sleep_mode(SLEEP_MODE_PWR_SAVE);
 
 	SetupEPaperDisplay();
+	ClearEpaper(EPD_5IN65F_BLACK);
+	_delay_ms(2000);
 	ClearEpaper(EPD_5IN65F_WHITE);
+	_delay_ms(2000);
+	EPD_5IN65F_Show7Block();
 
 	for (;;);
 

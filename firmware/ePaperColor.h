@@ -16,8 +16,8 @@
 #define WVS_DDR   DDRD
 
 // Display resolution
-#define EPD_WIDTH       600
-#define EPD_HEIGHT      448
+#define EPD_WIDTH       800
+#define EPD_HEIGHT      480
 
 /**********************************
 Color Index
