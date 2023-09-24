@@ -1,0 +1,155 @@
+2018-05-01
+
+Download image from: https://www.armbian.com/orange-pi-zero-2-h5/
+
+https://dl.armbian.com/orangepizeroplus2-h5/Debian_stretch_next.7z
+
+extract image
+
+# dd if=[image] of=/dev/mmcblk0 bs=1M
+
+Put disk image.
+teminal in, and... 
+  # nand-sata-install
+Select ext3.
+
+give it a few minutes.
+
+Reboot.
+
+ # nmcli device wifi rescan
+ # nmcli device wifi list
+ # nmcli device wifi connect SSID-Name password wireless-password
+
+You can now connect in directly.
+
+Mask daily cron it just does crazy stuff like unintended upgrades.
+ # systemctl mask apt-daily.service
+
+Install some stuff
+
+ # apt-get update
+ # apt-get dist-upgrade
+ # apt-get install build-essential zlib1g-dev libusb-1.0-0-dev git locate quilt libtool-bin debhelper dh-autoreconf fakeroot pkg-config autoconf automake libncurses-dev bison flex
+
+
+Patch the dtbs to add the mali node.
+ # apt-get install linux-dtb-dev-sunxi64
+ # apt-get dist-upgrade
+ # armbian-config
+  System->Nightly
+  Reboot
+  Put the 20-add-mali-node.dts file on the system.
+ # apt-get install linux-headers-next-sunxi64
+ # armbian-add-overlay 20-add-mali-node.dts
+ # reboot
+
+Get the Mali kernel module stuff...
+ # apt-get install linux-headers-next-sunxi64
+ # git clone https://github.com/mripard/sunxi-mali
+ #  cd sunxi-mali
+ #  export CROSS_COMPILE=
+ #  export KDIR=/usr/src/linux-headers-4.14.37-sunxi64/
+ #  export INSTALL_MOD_PATH=/lib/modules/4.14.37-sunxi64
+ #  ./build.sh -r r6p2 -b
+ #  ./build.sh -r r6p2 -i
+ #  insmod /root/git/sunxi-mali/r6p2/src/devicedrv/mali/mali.ko
+
+Atempt 2:
+ * Also check out Icenowy's one with r7p0
+ * copy mripard's May 3 patches over icensnow's patch folder
+ * Build as normal.
+ * Ctrl+c before it gets carried away.
+ * Edit the Makefile in r7p0/src/mali/ Makefile to set JOBS=1
+ * Comment out __GFP_REPEAT
+ * Build and insmod it.
+
+NEXT:
+Download the binary driver.
+https://github.com/rockchip-linux/libmali/blob/rockchip/lib/arm-linux-gnueabihf/libmali-utgard-400-r7p0-fbdev.so?raw=true
+
+Try copying mali to /usr/local/lib/libMali.so
+Add /root/git/sunxi-mali-linux/include/ to the include files.
+
+VVV Try this one!
+wget https://github.com/rockchip-linux/libmali/blob/rockchip/lib/aarch64-linux-gnu/libmali-utgard-450-r7p0-fbdev.so?raw=true -O /usr/lib/libMali.so
+
+Try installing...
+extraargs=cma=128M drm_kms_helper.drm_fbdev_overalloc=200
+# drm.debug=0xff
+# drm_kms_helper.drm_fbdev_permit_non_desktop=1
+
+to /boot/armbianEnv.txt
+
+
+Let's try this instead:
+
+git clone https://github.com/rockchip-linux/libmali.git
+cd libmali
+mkdir build
+cd build
+cmake ..
+make install
+
+
+
+
+
+
+
+NOOOOO
+
+Install existing kernel:
+ #  NO: apt-get install  linux-image-next-sunxi64 linux-dtb-next-sunxi64 linux-source-4.14.18-next-sunxi64
+ #  apt-get install linux-image-dev-sun50iw2 linux-headers-dev-sun50iw2 linux-dtb-dev-sun50iw2
+ # reboot
+
+
+
+
+TO GET KERNEL (Don't do this)
+
+ # mkdir git
+ # cd git
+ # git clone --depth 1 https://github.com/linux-sunxi/linux-sunxi -b sunxi-next
+ #  cd linux-sunxi
+ #  cat /proc/config.gz | gunzip > .config
+ #  make oldconfig
+ #  make -j3
+ #  make dtbs modules modules_install
+ #  
+
+
+
+
+"First get a working display driver"
+ # http://linux-sunxi.org/Display
+
+
+Err... consider this stuff: http://linux-sunxi.org/Mali_binary_driver
+
+
+
+
+
+
+
+
+
+
+Checkout some git stuff...
+ # mkdir git
+ # cd git
+ # git clone https://github.com/cnlohr/spreadgine
+ # git clone https://github.com/linux-sunxi/libump.git
+ #  cd libump
+ #  dpkg-buildpackage -b
+ #  libtool --finish /usr/lib/aarch64-linux-gnu
+ #  dpkg -i ../libump_*.deb
+ #  cd ..
+ # git clone --recursive https://github.com/linux-sunxi/sunxi-mali.git
+ #  cd sunxi-mali
+ #  export ABI=armhf
+
+
+
