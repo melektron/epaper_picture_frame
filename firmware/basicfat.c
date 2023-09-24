@@ -4,6 +4,7 @@
 #include "basicfat.h"
 #include "avr_print.h"
 #include <alloca.h>
+#include <stdio.h>
 #include "config.h"
 
 static uint32_t fat_partition_head;
@@ -57,6 +58,7 @@ try_readfat:
 	BPB_SecPerClus  = internal_8FAT();
 	BPB_RsvdSecCnt  = internal_16LEFAT();
 	BPB_NumFATs     = internal_8FAT();
+	printf("bps=%u spc=%u rsc=%u nfats=%u\n", (int)BPB_BytesPerSec, (int)BPB_SecPerClus, (int)BPB_RsvdSecCnt, (int)BPB_NumFATs);
 	/*BPB_RootEntCnt  = */ internal_16LEFAT();
 
 	dumpSDDAT( 13 ); //we don't care about any of these values.
@@ -79,7 +81,7 @@ try_readfat:
 		{
 			//Failed to find a valid FAT.
 			endSDread();
-			sendstr( "Could not find valid FAT32 entry.\n" );
+			sendstr( "Could not find valid FAT32 entry (1).\n" );
 			return 1;
 		}
 

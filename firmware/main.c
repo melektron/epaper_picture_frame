@@ -45,19 +45,19 @@ int UpdatePictureFromSDCard( int pictureno )
 	sendstr( "Init epaper" );
 
 	//Turn off power to ePaper
-	PORTD |= _BV(7);
-	DDRD |= _BV(7);
+	//PORTD |= _BV(7);
+	//DDRD |= _BV(7);
 	_delay_ms(50);
 	//Turn ePaper Power On
-	PORTD &= ~_BV(7);
-	DDRD |= _BV(6);
+	//PORTD &= ~_BV(7);
+	//DDRD |= _BV(6);
 
 	SetupEPaperDisplay();
 //	EPD_5IN65F_Show7Block();
 
 	//Micro SD Card
-	PORTC |= _BV(3);
-	DDRC |= _BV(3);
+	//PORTC |= _BV(3);
+	//DDRC |= _BV(3);
 
 	//Micro SD Power
 	//PORTE &= ~_BV(2);
@@ -112,6 +112,7 @@ int UpdatePictureFromSDCard( int pictureno )
 	}
 	else if( r )
 	{
+		sendstr("start display file");
 		filelen = 134400;
 		struct FileInfo f;
 		InitFileStructure( &f, r );
@@ -135,7 +136,7 @@ int UpdatePictureFromSDCard( int pictureno )
 		sendstr( "Read file completely.\n" );
 
 		//Turn SD Card off
-		PORTC &= 0xc0;
+		//PORTC &= 0xc0;
 		//PORTE |= _BV(2);
 		//DDRE |= _BV(2);
 
@@ -193,21 +194,19 @@ int main()
 	//rtc_init();
 	//set_sleep_mode(SLEEP_MODE_PWR_SAVE);
 
-	SetupEPaperDisplay();
-	ClearEpaper(EPD_5IN65F_BLACK);
-	_delay_ms(2000);
-	ClearEpaper(EPD_5IN65F_WHITE);
-	_delay_ms(2000);
-	EPD_5IN65F_Show7Block();
+	//SetupEPaperDisplay();
+	//ClearEpaper(EPD_5IN65F_BLACK);
+	//_delay_ms(2000);
+	//ClearEpaper(EPD_5IN65F_WHITE);
+	//_delay_ms(2000);
+	//EPD_5IN65F_Show7Block();
 
-	for (;;);
 
 	seconds_over_8 = 0;
 	pictureno++;
+	int r = UpdatePictureFromSDCard( pictureno );
 
-	
-
-	int r;// = UpdatePictureFromSDCard( pictureno );
+	for (;;);
 
 	while(1)
 	{

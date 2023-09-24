@@ -52,7 +52,7 @@ unsigned char endSDread()
 int main()
 {
 	int r;
-	sd_image = open( "/dev/sda", O_RDONLY );
+	sd_image = open( "/dev/mmcblk0", O_RDONLY );
 	if( sd_image <= 0 )
 	{
 		fprintf( stderr, "Could not open image.\n" );

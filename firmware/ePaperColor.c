@@ -102,13 +102,13 @@ void FlushAndDisplayEPaper()
 {
     sendstr("epaper flush start\n");
     SendCommand(0x04);//0x04
-    EPD_5IN65F_BusyHigh(150000);
+    EPD_5IN65F_BusyHigh(60000);
     SendCommand(0x12);//0x12
     SendData(0x00);
-    EPD_5IN65F_BusyHigh(150000);
+    EPD_5IN65F_BusyHigh(60000);
     SendCommand(0x02);  //0x02
     SendData(0x00);
-    EPD_5IN65F_BusyLow(150000);
+    EPD_5IN65F_BusyLow(60000);
 	_delay_us(20000);
     sendstr("epaper flush end\n");
 }
