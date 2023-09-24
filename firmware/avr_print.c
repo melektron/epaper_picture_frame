@@ -1,5 +1,10 @@
-/* AVR PRINTING (C) 2011 <>< Charles Lohr - This file may be licensed under the MIT/x11 or New BSD Licenses */
-//Use tinyispterm to use this: https://github.com/cnlohr/tinyispterm
+/* 
+AVR PRINTING (C) 2011 <>< Charles Lohr, modified by melektron - This file may be licensed under the MIT/x11 or New BSD Licenses 
+Modification Log:
+ - melektron@230924 added hardware UART support
+*/
+
+// Use tinyispterm to use this: https://github.com/cnlohr/tinyispterm
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -7,13 +12,48 @@
 #include <util/delay.h>
 #include <stdio.h>
 
-#define DUMBSERIALPIN 1
-#define DUMBSERIALPORT PORTE
-#define DUMBSERIALDDR  DDRE
+#include "avr_print.h"
+
+
+/*
+ * Code Start
+*/
 
 #ifndef MUTE_PRINTF
 
-#ifdef DUMBSERIALPIN
+
+
+#ifdef USE_HW_SERIAL
+
+// hardware UART guides: 
+// - http://www.rjhcoding.com/avrc-uart.php
+// - https://www.mikrocontroller.net/articles/AVR-GCC-Tutorial/Der_UART
+
+void setup_uart()
+{
+    // set baudrate in UBRR
+    UBRR0L = UBRRL_VALUE;	// calculated by util/setbaud.h
+    UBRR0H = UBRRH_VALUE;
+
+    // enable the transmitter and receiver
+    UCSR0B |= (1 << TXEN0) | (1 << RXEN0);	// rx unused
+
+	// format will stay default 8N1
+
+	// wait until ready
+	_delay_ms(50);
+}
+
+void sendchr(char data)
+{
+    // wait for transmit buffer to be empty
+    while(!(UCSR0A & (1 << UDRE0)));
+
+    // load data into transmit register
+    UDR0 = data;	
+}
+
+#elif defined USE_DUMB_SERIAL
 
 void sendchr( char c )
 {
@@ -41,7 +81,7 @@ void sendchr( char c )
 	sei();
 }
 
-#else
+#elif defined USE_HW_SPI
 
 #if	defined (__AVR_ATtiny2313__) || defined (__AVR_ATtiny2313A__)
 #define SPI_DDR_SET {DDRB&=0x1F;DDRB|=0x40;}
@@ -123,35 +163,7 @@ void sendchr( char c )
 #endif
 }
 
-
-#endif /* ending regular send DUMBSERIALPIN */
-
-void sendhex1( unsigned char i )
-{
-	sendchr( (i<10)?(i+'0'):(i+'A'-10) );
-}
-void sendhex2( unsigned char i )
-{
-	sendhex1( i>>4 );
-	sendhex1( i&0x0f );
-}
-void sendhex4( unsigned int i )
-{
-	sendhex2( i>>8 );
-	sendhex2( i&0xFF);
-}
-
-
-static int SPIPutCharInternal(char c, FILE *stream)
-{
-	sendchr( c );
-	return 0;
-}
-
-static FILE mystdout = FDEV_SETUP_STREAM( SPIPutCharInternal, NULL, _FDEV_SETUP_WRITE );
-
-#ifndef DUMBSERIALPIN
-void setup_spi( void )
+static void setup_spi( void )
 {
 	SPI_DDR_SET;
 
@@ -174,8 +186,50 @@ void setup_spi( void )
 #else
 #error NO_SPI_VECT_DEFINED
 #endif
-	stdout = &mystdout;
 }
+
+#endif	// end output selection
+
+// functions to format some data
+
+void sendhex1( unsigned char i )
+{
+	sendchr( (i<10)?(i+'0'):(i+'A'-10) );
+}
+void sendhex2( unsigned char i )
+{
+	sendhex1( i>>4 );
+	sendhex1( i&0x0f );
+}
+void sendhex4( unsigned int i )
+{
+	sendhex2( i>>8 );
+	sendhex2( i&0xFF);
+}
+
+// stdout stream implementation
+
+static int stream_putc_internal(char c, FILE *stream)
+{
+	sendchr( c );
+	return 0;
+}
+
+static FILE print_out_file = FDEV_SETUP_STREAM( stream_putc_internal, NULL, _FDEV_SETUP_WRITE );
+
+// setup routine
+
+void print_init()
+{
+	// Interface setup
+#ifdef USE_HW_SERIAL
+	setup_uart();
+#elif USE_HW_SPI
+	setup_spi();
 #endif
 
-#endif
+	// configure stdout
+	stdout = &print_out_file;
+}
+
+#endif	// MUTE_PRINTF

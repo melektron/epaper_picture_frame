@@ -1,0 +1,48 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/lib/gcc/avr/5.4.0/include",
+                "/usr/lib/gcc/avr/5.4.0/include-fixed",
+                "/usr/lib/gcc/avr/5.4.0/../../../avr/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "AVR",
+            "includePath": [
+                "/home/melektron/Documents/local_repos/epaper_picture_frame/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/avr-gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "${default}",
+            "compilerPathInCppPropertiesJson": "/usr/bin/avr-gcc",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "/home/melektron/Documents/local_repos/epaper_picture_frame/**",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "compilerArgs": [
+                "-c",
+                "-g",
+                "-Wa,-a,-ad",
+                "-O1",
+                "-mmcu=atmega328p",
+                "-DF_CPU=8000000UL",
+                "-I."
+            ]
+        }
+    ],
+    "version": 4
+}

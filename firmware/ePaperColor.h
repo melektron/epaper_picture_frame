@@ -5,7 +5,7 @@
 
 //ePaper Module from Waveshare, it's this one: https://www.waveshare.com/wiki/5.65inch_e-Paper_Module_(F)
 
-#define WVS_BUSY  1
+#define WVS_BUSY  7
 #define WVS_RESET 2
 #define WVS_DC    3
 #define WVS_CS    4

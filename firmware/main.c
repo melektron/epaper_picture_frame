@@ -4,6 +4,8 @@
 #include "fullsd.h"
 #include "avr_print.h"
 #include <avr/sleep.h>
+#include <stdio.h>
+
 
 void RunStatus()
 {
@@ -15,6 +17,12 @@ uint16_t seconds_over_8;
 ISR(TIMER2_OVF_vect)
 {
 	seconds_over_8++;
+	//val++;
+	//if (val > 15000)
+	//{
+	//	val = 0;
+	//	PORTB ^= _BV(PINB5);
+	//}
 	sendstr( "Seconds:" );
 	sendhex4( seconds_over_8);
 }
@@ -24,15 +32,15 @@ void rtc_init()
 	TCCR2A = 0x00;  //overflow
 	TCCR2B = 0x07;  //7 gives 8 sec. prescale
 	TIMSK2 = 0x01;  //enable timer2A overflow interrupt
-	ASSR  = 0x20;   //enable asynchronous mode
+	//ASSR  = 0x20;   //enable asynchronous mode
 }
 
 //Pictureno = 1 to n.
 int UpdatePictureFromSDCard( int pictureno )
 {
 	//Micro SD Power (Off)
-	PORTE |= _BV(2);
-	DDRE |= _BV(2);
+	//PORTE |= _BV(2);
+	//DDRE |= _BV(2);
 
 	sendstr( "Init epaper" );
 
@@ -52,7 +60,7 @@ int UpdatePictureFromSDCard( int pictureno )
 	DDRC |= _BV(3);
 
 	//Micro SD Power
-	PORTE &= ~_BV(2);
+	//PORTE &= ~_BV(2);
 
 	sendstr( "Init SD\n" );
 	int of = initSD();
@@ -128,8 +136,8 @@ int UpdatePictureFromSDCard( int pictureno )
 
 		//Turn SD Card off
 		PORTC &= 0xc0;
-		PORTE |= _BV(2);
-		DDRE |= _BV(2);
+		//PORTE |= _BV(2);
+		//DDRE |= _BV(2);
 
 		FlushAndDisplayEPaper();
 	}
@@ -147,7 +155,7 @@ int UpdatePictureFromSDCard( int pictureno )
 
 	//Turn SD Card off (if it was not already turned off)
 	PORTC &= 0xc0;
-	PORTE |= _BV(2);
+	//PORTE |= _BV(2);
 
 	return 0;
 }
@@ -156,13 +164,46 @@ int main()
 {
 	CLKPR = 0x80;
 	CLKPR = 0;
-	sendstr( "Initting RTC\n" );
-	rtc_init();
-	set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+	
+	// test LED
+	DDRB |= _BV(PINB5);
+	PORTB |= _BV(PINB5);
+
+	//for (;;)
+	//{
+	//	PORTB ^= _BV(PINB5);
+	//	_delay_ms(1000);
+	//}
+
+	// initialize printing
+	print_init();
+
+	//for (;;)
+	//{
+	//	PORTB |= _BV(PINB5);
+	//	_delay_ms(1000);
+	//	sendchr('a');
+	//
+	//	PORTB &= ~_BV(PINB5);
+	//	_delay_ms(1000);
+	//	sendchr('a');
+	//}
+
+	//puts("Initting RTC\n");
+	//rtc_init();
+	//set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+
+	SetupEPaperDisplay();
+	ClearEpaper(EPD_5IN65F_WHITE);
+
+	for (;;);
 
 	seconds_over_8 = 0;
 	pictureno++;
-	int r = UpdatePictureFromSDCard( pictureno );
+
+	
+
+	int r;// = UpdatePictureFromSDCard( pictureno );
 
 	while(1)
 	{
@@ -173,14 +214,14 @@ int main()
 		{
 			seconds_over_8 = 0;
 			pictureno++;
-			r = UpdatePictureFromSDCard( pictureno );
+			//r = UpdatePictureFromSDCard( pictureno );
 			sendstr( "Update picture:" );
 			sendhex2( r );
 			if( r < -6 )
 			{
 				pictureno = 0;
 				pictureno++;
-				r = UpdatePictureFromSDCard( pictureno );
+				//r = UpdatePictureFromSDCard( pictureno );
 			}
 		}
 		sendstr( "Awoken\n" );

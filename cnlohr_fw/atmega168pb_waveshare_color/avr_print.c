@@ -142,13 +142,13 @@ void sendhex4( unsigned int i )
 }
 
 
-static int SPIPutCharInternal(char c, FILE *stream)
+static int stream_putc_internal(char c, FILE *stream)
 {
 	sendchr( c );
 	return 0;
 }
 
-static FILE mystdout = FDEV_SETUP_STREAM( SPIPutCharInternal, NULL, _FDEV_SETUP_WRITE );
+static FILE mystdout = FDEV_SETUP_STREAM( stream_putc_internal, NULL, _FDEV_SETUP_WRITE );
 
 #ifndef DUMBSERIALPIN
 void setup_spi( void )

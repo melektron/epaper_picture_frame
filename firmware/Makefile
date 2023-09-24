@@ -1,10 +1,10 @@
-all : program.hex burn program.lst
+all : program.hex # burn program.lst
 CC = avr-gcc
 
 SRCS = main.c ePaperColor.c fullsd.c basicfat.c avr_print.c
 
-PROCESSOR=atmega168pb
-PROGRAMCODE=m168pb
+PROCESSOR=atmega328p
+PROGRAMCODE=m328p
 CFLAGS = -O1 -mmcu=$(PROCESSOR) -DF_CPU=8000000UL -I.
 ASFLAGS = $(CFLAGS) -x assembler-with-cpp
 
@@ -23,11 +23,11 @@ program.lst : $(SRCS)
 	avr-gcc -c -g -Wa,-a,-ad $(CFLAGS) $(LDFLAGS) $^ > $@
 
 burn : program.hex
-	sudo avrdude -c usbtiny -p $(PROGRAMCODE) -U flash:w:program.hex
+	sudo avrdude -c usbasp -p $(PROGRAMCODE) -U flash:w:program.hex
 
 
 readfuses :
-	sudo avrdude -c usbtiny -p $(PROGRAMCODE) -U hfuse:r:high.txt:b -U lfuse:r:low.txt:b
+	sudo avrdude -c usbasp -p $(PROGRAMCODE) -U hfuse:r:high.txt:b -U lfuse:r:low.txt:b
 
 #careful here...
 #burnfuses :
@@ -37,5 +37,5 @@ clean :
 	rm -f *~ high.txt low.txt program.hex program.map program.elf $(OBJS) *.o usbdrv/*.o usbdrv/*~ program.lst
 
 serial :
-	stty -F /dev/ttyUSB0 4800 -parenb -echo -cstopb
+	stty -F /dev/ttyACM0 9600 -parenb -echo -cstopb
 
