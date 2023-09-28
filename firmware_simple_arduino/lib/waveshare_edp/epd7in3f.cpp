@@ -304,6 +304,21 @@ void Epd::EPD_7IN3F_ShowAlternatingPixels(void)
     TurnOnDisplay();
 }
 
+void Epd::frameStreamStart(void)
+{
+    SendCommand(0x10);
+}
+
+void Epd::frameStreamTwoPixels(uint8_t _p1, uint8_t _p2)
+{
+    SendData((_p1 << 4) | _p2);
+}
+
+void Epd::frameStreamEnd(void)
+{
+    TurnOnDisplay();
+}
+
 /******************************************************************************
 function :
       Clear screen

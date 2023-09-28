@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "firmware_simple_arduino",
+			"path": "firmware_simple_arduino"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"common.h": "c",
+			"config.h": "c",
+			"sleep.h": "c",
+			"io.h": "c",
+			"setbaud.h": "c"
+		}
+	}
+}

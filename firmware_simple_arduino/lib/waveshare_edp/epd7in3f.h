@@ -74,6 +74,25 @@ public:
         UWORD image_width, UWORD image_heigh);
     void EPD_7IN3F_Show7Block(void);
     void EPD_7IN3F_ShowAlternatingPixels(void);
+
+    /**
+     * @brief initiates a pixel stream with full resolution
+     * (sends data start command)
+     */
+    void frameStreamStart(void);
+    /**
+     * @brief sends one byte of data to the display containing the color
+     * of two pixels. The color must be one of the color definitions.
+     * 
+     * @param _p1 pixel 1 color
+     * @param _p2 pixel 2 color
+     */
+    void frameStreamTwoPixels(uint8_t _p1, uint8_t _p2);
+    /**
+     * @brief ends the frame stream and shows the frame
+     */
+    void frameStreamEnd(void);
+
     void SendCommand(unsigned char command);
     void SendData(unsigned char data);
     void Sleep(void);
