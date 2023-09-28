@@ -73,6 +73,8 @@ uint32_t read32(File &f) {
 
 el::retcode sd_image::stream_bitmap(const char *_filename, uint16_t _width, uint16_t _height, pixel_callback _pixel_stream)
 {
+    // this function is based on code from Adafruit
+
     // This function opens a Windows Bitmap (BMP) file and
     // displays it at the given coordinates.  It's sped up
     // by reading many pixels worth of data at a time
