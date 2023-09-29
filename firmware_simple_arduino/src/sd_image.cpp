@@ -11,7 +11,6 @@ functions to read image data from SD-card
 
 #include "sd_image.hpp"
 
-File current_fileb;
 
 el::retcode sd_image::setup()
 {
@@ -50,25 +49,61 @@ void sd_image::dump_file(const char *_filename)
     file.close();
 }
 
+el::retcode sd_image::select_random_image_file(char *_filename_buffer, size_t _buffer_len)
+{
+    File folder = SD.open(SD_BITMAP_FOLDER, FILE_READ);
+    size_t file_count = 0;
 
-// These read 16- and 32-bit types from the SD card file.
-// BMP data is stored little-endian, Arduino is little-endian too.
-// May need to reverse subscript order if porting elsewhere.
+    if (!folder.isDirectory())
+    {
+        Serial.println("Bitmap folder is not a directory!");
+        folder.close();
+        return el::retcode::inv_path;
+    }
 
-uint16_t read16(File &f) {
-  uint16_t result;
-  ((uint8_t *)&result)[0] = f.read(); // LSB
-  ((uint8_t *)&result)[1] = f.read(); // MSB
-  return result;
+    // count how many files there are
+    for (;;)
+    {
+        File entry = folder.openNextFile();
+        if (!entry) // no more files
+            break;
+
+        if (!entry.isDirectory())   // only count files, don't count folders
+            file_count++;
+
+        entry.close();
+    }
+
+    size_t selected_image_nr = random(0, file_count);   // min=inclusive, max=exclusive
+
+    size_t target_len = snprintf(_filename_buffer, _buffer_len, "%04d.bmp", selected_image_nr   );
+    if (target_len >= _buffer_len)
+    {
+        Serial.println("Target name does not fit in buffer");
+        return el::retcode::err;
+    }
+
+    return el::retcode::ok;
 }
 
-uint32_t read32(File &f) {
-  uint32_t result;
-  ((uint8_t *)&result)[0] = f.read(); // LSB
-  ((uint8_t *)&result)[1] = f.read();
-  ((uint8_t *)&result)[2] = f.read();
-  ((uint8_t *)&result)[3] = f.read(); // MSB
-  return result;
+// helpers to read 16 and 32 bit blocks
+
+uint16_t read16(File &f)
+{
+    uint16_t result;
+    ((uint8_t *)&result)[0] = f.read(); // LSB
+    ((uint8_t *)&result)[1] = f.read(); // MSB
+    return result;
+}
+
+uint32_t read32(File &f)
+{
+    uint32_t result;
+    ((uint8_t *)&result)[0] = f.read(); // LSB
+    ((uint8_t *)&result)[1] = f.read();
+    ((uint8_t *)&result)[2] = f.read();
+    ((uint8_t *)&result)[3] = f.read(); // MSB
+    return result;
 }
 
 el::retcode sd_image::stream_bitmap(const char *_filename, uint16_t _width, uint16_t _height, pixel_callback _pixel_stream)
@@ -129,7 +164,7 @@ el::retcode sd_image::stream_bitmap(const char *_filename, uint16_t _width, uint
             Serial.println("Invalid number of planes in BMP!");
             return el::retcode::invalid;
         }
-   
+
         bmpDepth = read16(bmpFile); // bits per pixel
         Serial.print(F("Bit Depth: "));
         Serial.println(bmpDepth);

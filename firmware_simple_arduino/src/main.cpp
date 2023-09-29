@@ -68,51 +68,54 @@ void streamtest(uint32_t pixel)
 
 void setup()
 {
+    randomSeed(analogRead(A0));
+
     Serial.begin(115200);
     while (!Serial);
 
     Serial.println("Starting...");
 
+
+    Serial.println("Initializing SD Card...");
     if (sd_image::setup() == el::retcode::err)
     {
         Serial.println("Error during SD-init");
         for (;;);
     };
 
+    Serial.println("Initializing EPD...");
     if (epd.Init() != 0)
     {
         Serial.println("Error during e-Paper init");
         for (;;);
     }
 
+    Serial.println("Dumping test file...");
     sd_image::dump_file("test");
 
+    Serial.println("Dumping done, updating screen in 5sec ...");
     delay(5000);
 
-    Serial.println("== Rendering to e-Paper");
+    Serial.println("Updating EPD...");
+
+#define FN_BUF_LEN 50
+    char fn_buffer[FN_BUF_LEN];
+    if (sd_image::select_random_image_file(fn_buffer, FN_BUF_LEN) != el::retcode::ok)
+    {
+        Serial.println("Error while selecting image file");
+        for (;;);
+    }
+
+    Serial.print("Showing image: "); Serial.println(fn_buffer);
 
     epd.frameStreamStart();
-    if (sd_image::stream_bitmap("testimg.bmp", 800, 480, streamtest) == el::retcode::ok){
+    if (sd_image::stream_bitmap(fn_buffer, 800, 480, streamtest) == el::retcode::ok){
         epd.frameStreamEnd();
     }
 
-
-    //Serial.println("Black...");
-    //epd.Clear(EPD_7IN3F_BLACK);
-//
-    //delay(5000);
-
-    //epd.Clear(EPD_7IN3F_WHITE);
-
-    //Serial.print("Show pic\r\n ");
-    //epd.EPD_7IN3F_Display_part(gImage_7in3f, 250, 150, 300, 180);
-    //delay(2000);
-
-    //Serial.println("draw 7 color block");
-    //epd.EPD_7IN3F_ShowAlternatingPixels();
-    //delay(2000);
-
     Serial.println("Done!");
+
+    // sleep the display
     epd.Sleep();
 }
 
