@@ -160,7 +160,7 @@ uint32_t read32(File &f)
     return result;
 }
 
-el::retcode sd_image::stream_bitmap(const char *_filename, uint16_t _width, uint16_t _height, pixel_callback _pixel_stream)
+el::retcode sd_image::stream_bitmap(const char *_filename, pixel_callback _pixel_stream)
 {
     // this function is based on code from Adafruit
 

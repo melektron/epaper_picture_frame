@@ -67,6 +67,6 @@ namespace sd_image
      * @param _pixel_stream callback stream handler
      * @return el::retcode 
      */
-    el::retcode stream_bitmap(const char *_filename, uint16_t _width, uint16_t _height, pixel_callback _pixel_stream = nullptr);
+    el::retcode stream_bitmap(const char *_filename, pixel_callback _pixel_stream = nullptr);
 
 } // namespace sd_image
