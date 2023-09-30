@@ -28,7 +28,7 @@ el::retcode sd_image::setup()
 
 void sd_image::dump_file(const char *_filename)
 {
-    File file = SD.open(_filename, FILE_READ);
+    File file = SD.open(_filename, O_READ);
 
     if (file.isDirectory())
     {
@@ -49,9 +49,61 @@ void sd_image::dump_file(const char *_filename)
     file.close();
 }
 
+uint32_t sd_image::static_random_number(uint32_t _max)
+{
+    unsigned long context = 1;
+
+    // read context from SD card
+    File context_file = SD.open(SD_RNG_CONTEXT, O_READ);
+    if (!context_file)
+    {
+        Serial.println("Error opening RNG context file.");
+        for (;;);
+    }
+    if (context_file.isDirectory())
+    {
+        Serial.println("RNG context is directory, cannot parse!");
+        context_file.close();
+        for (;;);
+    }
+    if (!context_file.available())
+    {
+        Serial.println("Error reading RNG context from SD, not available.");
+        context_file.close();
+        for (;;);
+    }
+    context = context_file.parseInt();
+    context_file.close();
+    
+    Serial.print("RNG load context: "); Serial.println(context);
+    
+    uint32_t result = (uint32_t)rand_r(&context);
+
+    Serial.print("RNG result (full): "); Serial.println(result);
+    Serial.print("RNG store context: "); Serial.println(context);
+
+    // store context to file
+    context_file = SD.open(SD_RNG_CONTEXT, O_WRITE | O_TRUNC);
+    if (!context_file)
+    {
+        Serial.println("Error opening RNG context file for write.");
+        for (;;);
+    }
+    if (!context_file.availableForWrite())
+    {
+        Serial.println("Error writing to RNG context on SD, not available.");
+        context_file.close();
+        for (;;);
+    }
+    context_file.print(context);
+    context_file.close();
+
+    return result % _max;
+}
+
 el::retcode sd_image::select_random_image_file(char *_filename_buffer, size_t _buffer_len)
 {
-    File folder = SD.open(SD_BITMAP_FOLDER, FILE_READ);
+    File folder = SD.open(SD_BITMAP_FOLDER, O_READ);
     size_t file_count = 0;
 
     if (!folder.isDirectory())
@@ -74,9 +126,11 @@ el::retcode sd_image::select_random_image_file(char *_filename_buffer, size_t _b
         entry.close();
     }
 
-    size_t selected_image_nr = random(0, file_count);   // min=inclusive, max=exclusive
+    folder.close();
 
-    size_t target_len = snprintf(_filename_buffer, _buffer_len, "%04d.bmp", selected_image_nr   );
+    size_t selected_image_nr = static_random_number(file_count);   // min=inclusive, max=exclusive
+
+    size_t target_len = snprintf(_filename_buffer, _buffer_len, "%s/%04d.bmp", SD_BITMAP_FOLDER, selected_image_nr);
     if (target_len >= _buffer_len)
     {
         Serial.println("Target name does not fit in buffer");
@@ -139,7 +193,7 @@ el::retcode sd_image::stream_bitmap(const char *_filename, uint16_t _width, uint
     Serial.println('\'');
 
     // Open requested file on SD card
-    if ((bmpFile = SD.open(_filename, FILE_READ)) == false)
+    if ((bmpFile = SD.open(_filename, O_READ)) == false)
     {
         Serial.print(F("File not found"));
         return el::retcode::notfound;

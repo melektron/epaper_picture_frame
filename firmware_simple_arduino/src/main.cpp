@@ -68,8 +68,6 @@ void streamtest(uint32_t pixel)
 
 void setup()
 {
-    randomSeed(analogRead(A0));
-
     Serial.begin(115200);
     while (!Serial);
 
@@ -90,11 +88,11 @@ void setup()
         for (;;);
     }
 
-    Serial.println("Dumping test file...");
-    sd_image::dump_file("test");
+    //Serial.println("Dumping test file...");
+    //sd_image::dump_file("test");
 
-    Serial.println("Dumping done, updating screen in 5sec ...");
-    delay(5000);
+    //Serial.println("Dumping done, updating screen in 5sec ...");
+    //delay(5000);
 
     Serial.println("Updating EPD...");
 

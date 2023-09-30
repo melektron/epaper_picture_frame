@@ -14,6 +14,7 @@ functions to read image data from SD-card
 
 #define SD_CS_PIN 4
 #define SD_BITMAP_FOLDER "epd_imgs"
+#define SD_RNG_CONTEXT "rng"
 
 namespace sd_image
 {
@@ -36,6 +37,16 @@ namespace sd_image
      * @param _filename name of file to dump
      */
     void dump_file(const char *_filename);
+
+    /**
+     * @brief generates a random number with the pseudo RNG context
+     * being stored on the SD card, so the number stays "random" even
+     * throughout power cycles.
+     * 
+     * @param _max upper boundary of numbers (exclusive)
+     * @return int32_t random number between 0 and _max
+     */
+    uint32_t static_random_number(uint32_t _max);
 
     /**
      * @brief selects a random image file from the image folder
