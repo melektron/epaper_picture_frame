@@ -29,6 +29,8 @@ uint8_t rgb_to_epd(uint32_t _rgb)
 {
     switch (_rgb)
     {
+    /* Pallette experimenting:
+
     // original test pallette (pal1)
     case 0x0006c5: return EPD_7IN3F_BLACK;
     case 0xffffff: return EPD_7IN3F_WHITE;
@@ -78,6 +80,18 @@ uint8_t rgb_to_epd(uint32_t _rgb)
     //case 0xdfca00: return EPD_7IN3F_YELLOW;
     case 0xc97249: return EPD_7IN3F_ORANGE;
     //case 0xe8c7b4: return EPD_7IN3F_CLEAN;
+
+    */
+
+    // Final pallette
+    case 0x302637: return EPD_7IN3F_BLACK;
+    case 0xfafafa: return EPD_7IN3F_WHITE;
+    case 0x0052f7: return EPD_7IN3F_BLUE;
+    case 0x2ea102: return EPD_7IN3F_GREEN;
+    case 0x923d3e: return EPD_7IN3F_RED;
+    case 0xdfca00: return EPD_7IN3F_YELLOW;
+    case 0xc97249: return EPD_7IN3F_ORANGE;
+    case 0xe8c7b4: return EPD_7IN3F_CLEAN;
     
     default:
         Serial.write('i'); Serial.println(_rgb, HEX);
@@ -115,6 +129,7 @@ void setup()
         Serial.println("Error during SD-init");
         for (;;);
     };
+    //Serial.println("Successfully initialized SD Card!");
 
     Serial.println("Initializing EPD...");
     if (epd.Init() != 0)
@@ -122,25 +137,21 @@ void setup()
         Serial.println("Error during e-Paper init");
         for (;;);
     }
+    //Serial.println("Successfully initialized EPD!");
 
-    return;
+    //Serial.println("Updating screen in 5sec ...");
+    //delay(5000);
 
-    //Serial.println("Dumping test file...");
-    //sd_image::dump_file("test");
+    //epd.frameStreamStart();
+    //if (sd_image::stream_bitmap("pal5.bmp", epd_pixel_stream_receiver) == el::retcode::ok){
+    //    epd.frameStreamEnd();
+    //}
+    //epd.Sleep();
+    //
+    //Serial.println("Done temp!");
+    //for (;;);
 
-    Serial.println("Dumping done, updating screen in 5sec ...");
-    delay(5000);
-
-    epd.frameStreamStart();
-    if (sd_image::stream_bitmap("pal5.bmp", epd_pixel_stream_receiver) == el::retcode::ok){
-        epd.frameStreamEnd();
-    }
-    epd.Sleep();
-    
-    Serial.println("Done temp!");
-    for (;;);
-
-    Serial.println("Updating EPD...");
+    //Serial.println("Updating EPD...");
 
     if (sd_image::select_random_image_file(fn_buffer, FN_BUF_LEN) != el::retcode::ok)
     {
@@ -159,6 +170,8 @@ void setup()
 
     // sleep the display
     epd.Sleep();
+
+    for (;;);   // remove this to enter interactive mode
 }
 
 void loop()

@@ -140,7 +140,6 @@ This pallette however produced a very bleached out image, mostly due to the more
 ```
 ![pal3](pal3.png)
 
-
 Further modifying the other colors makes for much more natural looking skin tones, at least on a regular computer screen:
 
 ```jsonc
@@ -217,6 +216,5 @@ In the end, we endet up with this pallette which looks almost like the original,
     {"hex":"#e8c7b4"}
 ]
 ```
-
 
 For final "production", we are planning on using a simple bash script that takes a number of ruffly-correct shaped input images, crops them to 800x480, dithers them according to the pallet, converts them to the appropriate bitmap format and renames them to the required naming sequence for the firmware. This is done using imagemagick's mogrify and a simple command line tool called ["didder"](https://github.com/makew0rld/didder).
