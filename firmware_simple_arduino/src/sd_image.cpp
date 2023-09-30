@@ -14,15 +14,15 @@ functions to read image data from SD-card
 
 el::retcode sd_image::setup()
 {
-    Serial.println("Initializing SD card...");
+    Serial.println(F("Initializing SD card..."));
 
     if (!SD.begin(SD_CS_PIN))
     {
-        Serial.println("initialization failed!");
+        Serial.println(F("initialization failed!"));
         return el::retcode::err;
     }
 
-    Serial.println("initialization done.");
+    Serial.println(F("initialization done."));
     return el::retcode::ok;
 }
 
@@ -32,19 +32,19 @@ void sd_image::dump_file(const char *_filename)
 
     if (file.isDirectory())
     {
-        Serial.println("Is directory, cannot dump!");
+        Serial.println(F("Is directory, cannot dump!"));
         file.close();
         return;
     }
 
-    Serial.println("===== START OF FILE =====");
+    Serial.println(F("===== START OF FILE ====="));
 
     while (file.available())
     {
         Serial.write(file.read());
     }
 
-    Serial.println("\n====== END OF FILE ======");
+    Serial.println(F("\n====== END OF FILE ======"));
 
     file.close();
 }
@@ -57,41 +57,41 @@ uint32_t sd_image::static_random_number(uint32_t _max)
     File context_file = SD.open(SD_RNG_CONTEXT, O_READ);
     if (!context_file)
     {
-        Serial.println("Error opening RNG context file.");
+        Serial.println(F("Error opening RNG context file."));
         for (;;);
     }
     if (context_file.isDirectory())
     {
-        Serial.println("RNG context is directory, cannot parse!");
+        Serial.println(F("RNG context is directory, cannot parse!"));
         context_file.close();
         for (;;);
     }
     if (!context_file.available())
     {
-        Serial.println("Error reading RNG context from SD, not available.");
+        Serial.println(F("Error reading RNG context from SD, not available."));
         context_file.close();
         for (;;);
     }
     context = context_file.parseInt();
     context_file.close();
     
-    Serial.print("RNG load context: "); Serial.println(context);
+    Serial.print(F("RNG load context: ")); Serial.println(context);
     
     uint32_t result = (uint32_t)rand_r(&context);
 
-    Serial.print("RNG result (full): "); Serial.println(result);
-    Serial.print("RNG store context: "); Serial.println(context);
+    Serial.print(F("RNG result (full): ")); Serial.println(result);
+    Serial.print(F("RNG store context: ")); Serial.println(context);
 
     // store context to file
     context_file = SD.open(SD_RNG_CONTEXT, O_WRITE | O_TRUNC);
     if (!context_file)
     {
-        Serial.println("Error opening RNG context file for write.");
+        Serial.println(F("Error opening RNG context file for write."));
         for (;;);
     }
     if (!context_file.availableForWrite())
     {
-        Serial.println("Error writing to RNG context on SD, not available.");
+        Serial.println(F("Error writing to RNG context on SD, not available."));
         context_file.close();
         for (;;);
     }
@@ -108,7 +108,7 @@ el::retcode sd_image::select_random_image_file(char *_filename_buffer, size_t _b
 
     if (!folder.isDirectory())
     {
-        Serial.println("Bitmap folder is not a directory!");
+        Serial.println(F("Bitmap folder is not a directory!"));
         folder.close();
         return el::retcode::inv_path;
     }
@@ -133,7 +133,7 @@ el::retcode sd_image::select_random_image_file(char *_filename_buffer, size_t _b
     size_t target_len = snprintf(_filename_buffer, _buffer_len, "%s/%04d.bmp", SD_BITMAP_FOLDER, selected_image_nr);
     if (target_len >= _buffer_len)
     {
-        Serial.println("Target name does not fit in buffer");
+        Serial.println(F("Target name does not fit in buffer"));
         return el::retcode::err;
     }
 
@@ -215,7 +215,7 @@ el::retcode sd_image::stream_bitmap(const char *_filename, pixel_callback _pixel
         bmpHeight = read32(bmpFile);
         if (read16(bmpFile) != 1) // # planes -- must be '1'
         {
-            Serial.println("Invalid number of planes in BMP!");
+            Serial.println(F("Invalid number of planes in BMP!"));
             return el::retcode::invalid;
         }
 
@@ -225,13 +225,13 @@ el::retcode sd_image::stream_bitmap(const char *_filename, pixel_callback _pixel
 
         if (bmpDepth != 24) // must be 24 bits/pixel
         {
-            Serial.println("Invalid bit-depth!");
+            Serial.println(F("Invalid bit-depth!"));
             return el::retcode::invalid;
         }
 
         if (read32(bmpFile) != 0) // 0 = uncompressed
         {
-            Serial.println("Compressed BMP not supported!");
+            Serial.println(F("Compressed BMP not supported!"));
             return el::retcode::invalid;
         }
 
@@ -306,7 +306,7 @@ el::retcode sd_image::stream_bitmap(const char *_filename, pixel_callback _pixel
 
         Serial.print(F("Loaded in "));
         Serial.print(millis() - startTime);
-        Serial.println(" ms");
+        Serial.println(F(" ms"));
     }
 
     bmpFile.close();

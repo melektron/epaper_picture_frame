@@ -120,21 +120,21 @@ void setup()
     Serial.begin(115200);
     while (!Serial);
 
-    Serial.println("Starting...");
+    Serial.println(F("Starting..."));
 
 
-    Serial.println("Initializing SD Card...");
+    Serial.println(F("Initializing SD Card..."));
     if (sd_image::setup() == el::retcode::err)
     {
-        Serial.println("Error during SD-init");
+        Serial.println(F("Error during SD-init"));
         for (;;);
     };
     //Serial.println("Successfully initialized SD Card!");
 
-    Serial.println("Initializing EPD...");
+    Serial.println(F("Initializing EPD..."));
     if (epd.Init() != 0)
     {
-        Serial.println("Error during e-Paper init");
+        Serial.println(F("Error during e-Paper init"));
         for (;;);
     }
     //Serial.println("Successfully initialized EPD!");
@@ -155,18 +155,18 @@ void setup()
 
     if (sd_image::select_random_image_file(fn_buffer, FN_BUF_LEN) != el::retcode::ok)
     {
-        Serial.println("Error while selecting image file");
+        Serial.println(F("Error while selecting image file"));
         for (;;);
     }
 
-    Serial.print("Showing image: "); Serial.println(fn_buffer);
+    Serial.print(F("Showing image: ")); Serial.println(fn_buffer);
 
     epd.frameStreamStart();
     if (sd_image::stream_bitmap(fn_buffer, epd_pixel_stream_receiver) == el::retcode::ok){
         epd.frameStreamEnd();
     }
 
-    Serial.println("Done!");
+    Serial.println(F("Done!"));
 
     // sleep the display
     epd.Sleep();
