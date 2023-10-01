@@ -218,3 +218,16 @@ In the end, we endet up with this pallette which looks almost like the original,
 ```
 
 For final "production", we are planning on using a simple bash script that takes a number of ruffly-correct shaped input images, crops them to 800x480, dithers them according to the pallet, converts them to the appropriate bitmap format and renames them to the required naming sequence for the firmware. This is done using imagemagick's mogrify and a simple command line tool called ["didder"](https://github.com/makew0rld/didder).
+
+## The workflow - foto preparation in advance
+
+* Fill your working directory with selected images (.jpg).
+* For later automated processing the format and extension should be set to ".jpg".
+* Images should be batch-resized to a resolution appropriate to select the desired region of interest afterwards, e.g. 1300 x 700 pixels. Tools like imagemagick (commandline) or xnconvert (GUI) can be used for batch resizing.
+* Open your images with a graphical image editor of your choice, select and pre-crop your region of interest (a rectangle somewhat larger than 800 x 480), and save your pre-cropped images. On a mac, I used the Preview.app for this manual preparation.
+
+## The bash shell one-liner
+
+```shell
+for  f  in  *.jpg;  do  magick "$f"  -crop 800x480+0+0 - |  didder --in  -  --out  "$f".png  --palette '302637 fafafa 0052f7 2ea102 923d3e dfca00 c97249 e8c7b4'  edm --serpentine floydsteinberg; done  &&  sleep 1   &&  magick *.png %04d.bmp  &&  sleep 1  &&  rm *.png
+```
