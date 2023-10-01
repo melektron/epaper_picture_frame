@@ -81,11 +81,11 @@ I may implemented the proper firmware and automatic refreshing when I have more 
 
 In order to display an image, we have opted to properly size and dither it on a computer and then place it on the SD card in 24-Bit RGB888 Bitmap format.
 
-For Floyd-Steinberg-dithering, a color pallette has to be selected. We use all 8 Colors of the panel, including the unofficial "clean" color which is quite useful as a skin color.
+For Floyd-Steinberg-dithering, a color palette has to be selected. We use all 8 Colors of the panel, including the unofficial "clean" color which is quite useful as a skin color.
 
-For testing, the tool https://ditherit.com/ allows pasting a custom 8-Color pallette and dithers the image.
+For testing, the tool https://ditherit.com/ allows pasting a custom 8-Color palette and dithers the image.
 
-Initially we used the following pallette for testing which was just ruffly picked but looked surprisingly good on the actual epaper panel despite having a really blue-ish black and the color overall not matching to well on the computer:
+Initially we used the following palette for testing which was just ruffly picked but looked surprisingly good on the actual epaper panel despite having a really blue-ish black and the color overall not matching to well on the computer:
 
 ```jsonc
 // pal1
@@ -123,7 +123,7 @@ Although this cannot be perfectly represented by RGB, we can try to convert the 
 ```
 ![pal2](pal2.png)
 
-This pallette however produced a very bleached out image, mostly due to the more gray then white white color. Skin and white clothing were mostly just blobs of gray without any dithering effect. Adjusting the blue and white colors improves this a lot already:
+This palette however produced a very bleached out image, mostly due to the more gray then white white color. Skin and white clothing were mostly just blobs of gray without any dithering effect. Adjusting the blue and white colors improves this a lot already:
 
 ```jsonc
 // pal3
@@ -159,7 +159,7 @@ Further modifying the other colors makes for much more natural looking skin tone
 
 When tested on the real epaper panel, none of the above produced a really good result. pal3 produced lighter greens, but the entire image had a green tint.
 
-We experimented some more with the panel, mixing colors from the above pallettes and tweaking some and we went through a few iterations:
+We experimented some more with the panel, mixing colors from the above palettes and tweaking some and we went through a few iterations:
 
 ```jsonc
 // pal5
@@ -201,7 +201,7 @@ We experimented some more with the panel, mixing colors from the above pallettes
 ]
 ```
 
-In the end, we endet up with this pallette which looks almost like the original, except truer reds and maybe better greens:
+In the end, we endet up with this palette which looks almost like the original, except truer reds and maybe better greens:
 
 ```jsonc
 // pal8
@@ -219,15 +219,20 @@ In the end, we endet up with this pallette which looks almost like the original,
 
 For final "production", we are planning on using a simple bash script that takes a number of ruffly-correct shaped input images, crops them to 800x480, dithers them according to the pallet, converts them to the appropriate bitmap format and renames them to the required naming sequence for the firmware. This is done using imagemagick's mogrify and a simple command line tool called ["didder"](https://github.com/makew0rld/didder).
 
-## The workflow - foto preparation in advance
+### Manual image file preparation
 
-* Fill your working directory with selected images (.jpg).
-* For later automated processing the format and extension should be set to ".jpg".
-* Images should be batch-resized to a resolution appropriate to select the desired region of interest afterwards, e.g. 1300 x 700 pixels. Tools like imagemagick (commandline) or xnconvert (GUI) can be used for batch resizing.
-* Open your images with a graphical image editor of your choice, select and pre-crop your region of interest (a rectangle somewhat larger than 800 x 480), and save your pre-cropped images. On a mac, I used the Preview.app for this manual preparation.
+A few manual steps are required for preparing images:
 
-## The bash shell one-liner
+- Fill your working directory with selected images (must be exactly ".jpg", not ".jpeg" or similar).
+- The input images must be approximately 800x480 px (or slightly larger) in size.
+  > **Note:** <br> Usually, you don't want to display the entirety of a photo on the small screen. Therefore it is helpful to first resize our images to about 1300x700 px in order to then be able to select the region-of-interest with approximately the correct resolution.
 
-```shell
+### Automatic dithering process 
+
+To finalize the image files for the display, simply run the following one-liner in the folder with the .jpg files (didder and imagemagick are required):
+
+```bash
 for  f  in  *.jpg;  do  magick "$f"  -crop 800x480+0+0 - |  didder --in  -  --out  "$f".png  --palette '302637 fafafa 0052f7 2ea102 923d3e dfca00 c97249 e8c7b4'  edm --serpentine floydsteinberg; done  &&  sleep 1   &&  magick *.png %04d.bmp  &&  sleep 1  &&  rm *.png
 ```
+
+This crops the images to their final size for the display (800x480 px, starting in the top-left corner), dithers them according to the selected palette (pal8), converts the resulting .png files to .bmp and renames them to the required number sequence (0000.bmp, 0001.bmp, ...).
